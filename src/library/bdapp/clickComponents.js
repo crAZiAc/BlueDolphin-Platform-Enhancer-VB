@@ -43,6 +43,62 @@ $(document).ready(function() {
 
     });
 
+    $(document).on("click", "#projTemp", function() {
+        var currentdate = new Date();
+        getBDPath();
+        getTenant();
+
+        chrome.storage.local.get(["key"]).then((result) => {
+            if (result.key) {
+                let data = JSON.parse(result.key);
+                for (i = 0; i < data.length; ++i) {
+                    if (data[i].tenant == tenant) {
+                        let entry = data[i];
+                        let packages = entry.packages;
+                        let apiKey = entry.apiKey;
+                        let environment = entry.environment;
+                        let package = $(this).attr("packageName");
+                        let projectId = $(location).attr("pathname").split("/")[3];
+                        let baseName = prompt("Please enter the base name for the views");
+                        if (baseName != "" & baseName != null) {
+                            console.log("BaseName: " + baseName);
+                            console.log("Data: " + i);
+                            for (t = 0; t < packages.length; ++t) {
+                                console.log("Packages: " + t);
+                                if (packages[t].packageName == package) {
+                                    packageEntry = packages[t];
+                                    var mainViewBaseName = packageEntry.mainViewBaseName;
+                                    var views = packageEntry.views;
+                                    for (x = 0; x < views.length; ++x) {
+                                        views[x].childViewName = views[x].childViewBaseName;
+                                    }
+                                    console.log("Number of child views: " + x);
+                                    let server = "https://bdmanagement.azurewebsites.net/api/views/frompackage/";
+                                    //let server = "http://localhost:7071/api/views/frompackage/";
+                                    fetch(server + environment + "/" + tenant + "/" + projectId, {
+                                            method: "POST",
+                                            body: JSON.stringify({
+                                                packageName: package,
+                                                baseTemplateName: baseName,
+                                                views: views
+                                            }),
+                                            headers: {
+                                                "Content-type": "application/json; charset=UTF-8",
+                                                "X-API-Key": apiKey
+                                            }
+                                        })
+                                        .then((response) => window.location.href = page + 'drafts/' + response.headers.get('Location'));
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+
     $(document).on("click", "#cusTemp", function() {
         var currentdate = new Date();
         getBDPath();

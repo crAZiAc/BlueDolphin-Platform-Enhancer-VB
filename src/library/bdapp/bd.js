@@ -29,6 +29,32 @@ document.arrive(".create-template-view", function(archtemplate) {
     });
 });
 
+
+
+//Add custom templates to project screen
+document.arrive(".css-1acglol", function(viewFromPackage) {
+    var html = '';
+    getTenant();
+    chrome.storage.local.get(["key"]).then((result) => {
+        if (result.key) {
+            let data = JSON.parse(result.key);
+            for (i = 0; i < data.length; ++i) {
+                let entry = data[i];
+                if (entry.tenant == tenant) {
+                    let packages = entry.packages;
+                    for (t = 0; t < packages.length; ++t) {
+                        let li = '<div id="projTemp" packageName="' + packages[t].packageName + '" class="MuiBox-root css-1r9m1x3" title="' + packages[t].packageName + '"><div class="MuiBox-root css-n1nmwo"><img width=182 alt="' + packages[t].packageName + '" src="' + packages[t].base64Image +
+                            '"></div><div class="MuiBox-root css-flpvhd"><span class="MuiTypography-root MuiTypography-caption css-1j1ubg4"> ' + packages[t].packageName + '</span></div></div>'
+                        html = html + li;
+                    }
+                    viewFromPackage.children[1].children[0].insertAdjacentHTML("beforeend", html);
+
+                }
+            }
+        }
+    });
+});
+
 // Check existing templates
 document.arrive(".thumbnail", function(archView) {
     getTenant();
